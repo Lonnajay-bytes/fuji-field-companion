@@ -3,121 +3,291 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#1d211d">
+  <meta name="theme-color" content="#1d241f">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Fuji Field">
+  <meta name="description" content="A complete Fujifilm X-T5 recipe, planning, learning, and shooting companion.">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="preconnect" href="https://api.open-meteo.com">
+  <link rel="preconnect" href="https://geocoding-api.open-meteo.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="css/styles.css">
   <title>Fuji Field Companion</title>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="topbar">
-  <div class="brand">FUJI FIELD <span>COMPANION</span></div>
-  <button id="menuBtn" class="icon-btn" aria-label="Open menu">☰</button>
-  <nav id="nav">
-    <button data-go="home">Home</button>
-    <button data-go="finder">Finder</button>
-    <button data-go="library">Library</button>
-    <button data-go="slots">C1–C7</button>
-    <button data-go="learn">Learn</button>
-    <button data-go="tools">Tools</button>
+  <button class="brand" data-route="home" aria-label="Fuji Field Companion home">
+    <span class="brand-mark">FF</span><span>FUJI FIELD <em>COMPANION</em></span>
+  </button>
+  <button id="menuBtn" class="icon-btn mobile-only" aria-label="Open navigation">☰</button>
+  <nav id="mainNav" aria-label="Main navigation">
+    <button data-route="finder">Finder</button>
+    <button data-route="library">Recipes</button>
+    <button data-route="slots">C1–C7</button>
+    <button data-route="builder">Builder</button>
+    <button data-route="guide">X‑T5 Guide</button>
+    <button data-route="planner">Planner</button>
+    <button data-route="journal">Journal</button>
+    <button data-route="tools">Tools</button>
   </nav>
+  <div class="header-actions">
+    <button id="installBtn" class="quiet hidden">Install</button>
+    <button id="themeBtn" class="icon-btn" aria-label="Toggle theme">◐</button>
+  </div>
 </header>
 
-<main>
-<section id="home" class="hero page-section">
-  <div class="hero-copy">
-    <p class="eyebrow">Built for Fujifilm X‑T5 + XF 16–80mm</p>
-    <h1>Pick the look.<br>Make the photograph.</h1>
-    <p class="lede">A mobile-first field guide for choosing, saving, comparing, and learning Fujifilm recipes—without needing a Black Mist filter.</p>
-    <div class="button-row">
-      <button class="primary" data-go="finder">Find a recipe</button>
-      <button class="secondary" data-go="library">Browse 120 recipes</button>
+<main id="main">
+<section id="home" class="view active">
+  <div class="hero shell">
+    <div class="hero-copy">
+      <p class="eyebrow">Fujifilm X‑T5 · XF 16–80mm</p>
+      <h1>Know the look<br>before you shoot.</h1>
+      <p class="lede">A field-ready recipe library with graded previews, live weather recommendations, an interactive X‑T5 guide, planning tools, and a private shooting journal.</p>
+      <div class="button-row">
+        <button class="primary" data-route="finder">Find today’s recipe</button>
+        <button class="secondary" data-route="library">Browse all 130</button>
+      </div>
+      <div class="hero-badges">
+        <span>130 graded previews</span><span>Black Mist labels</span><span>Offline recipe access</span>
+      </div>
     </div>
+    <figure class="hero-image">
+      <img src="assets/previews/golden-03.jpg" alt="Warm editorial recipe preview">
+      <figcaption><b>Warm Editorial</b><span>Processed preview approximating the recipe</span></figcaption>
+    </figure>
   </div>
-  <div class="hero-visual">
-    <div class="camera-card">
-      <div class="camera-top"></div>
-      <div class="camera-body"><div class="lens"></div></div>
-      <div class="camera-caption">Your X‑T5 field companion</div>
+
+  <div class="shell stat-grid">
+    <article><b>130</b><span>original X‑T5 starting points</span></article>
+    <article><b>1 each</b><span>graded preview per recipe</span></article>
+    <article><b>C1–C7</b><span>editable slot planner</span></article>
+    <article><b>Live</b><span>weather + sunrise/sunset</span></article>
+  </div>
+
+  <section class="shell section">
+    <div class="section-heading">
+      <div><p class="eyebrow">Right now</p><h2>Weather-aware shooting brief</h2></div>
+      <p>Search a city or use your current location. The app turns the forecast into practical recipe and exposure suggestions.</p>
     </div>
-  </div>
+    <div class="weather-layout">
+      <div class="panel">
+        <div class="inline-form">
+          <input id="homeLocationInput" placeholder="City or ZIP code" autocomplete="off">
+          <button id="homeLocationSearch" class="primary">Search</button>
+          <button id="useLocationBtn" class="secondary">Use my location</button>
+        </div>
+        <div id="locationChoices" class="choice-list"></div>
+        <div id="weatherCard" class="weather-card empty-state">Choose a location to load current conditions.</div>
+      </div>
+      <div class="panel">
+        <h3>Recommended permanent set</h3>
+        <div id="homePermanent" class="mini-recipe-list"></div>
+        <button class="text-button" data-route="slots">Open C1–C7 planner →</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell section">
+    <div class="section-heading">
+      <div><p class="eyebrow">Curated collections</p><h2>Start with the scene</h2></div>
+    </div>
+    <div id="collectionCards" class="collection-grid"></div>
+  </section>
+
+  <section class="shell section">
+    <div class="section-heading"><div><p class="eyebrow">Workflow</p><h2>Phone, camera, and XApp</h2></div></div>
+    <div class="three-grid">
+      <article class="panel step"><b>01</b><h3>Choose a recipe here</h3><p>Use the graded preview, finder score, weather, and subject guidance.</p></article>
+      <article class="panel step"><b>02</b><h3>Load it into C1–C7</h3><p>Follow the camera-order checklist or restore a full saved settings profile through XApp.</p></article>
+      <article class="panel step"><b>03</b><h3>Shoot RAW+JPEG</h3><p>Keep the finished JPEG while preserving a flexible RAW file for larger corrections.</p></article>
+    </div>
+  </section>
 </section>
 
-<section class="quick-grid">
-  <article><b>120</b><span>recipes</span></article>
-  <article><b>7</b><span>custom banks</span></article>
-  <article><b>16–80</b><span>lens guidance</span></article>
-  <article><b>Offline</b><span>after install</span></article>
-</section>
-
-<section id="finder" class="page-section">
-  <div class="section-heading"><p class="eyebrow">Recipe finder</p><h2>What are you shooting today?</h2></div>
-  <div class="panel form-grid">
-    <label>Subject<select id="subject"><option>travel</option><option>beach</option><option>street</option><option>nature</option><option>food</option><option>cars</option><option>portrait</option><option>cinematic</option></select></label>
-    <label>Time<select id="time"><option>Any</option><option>Morning</option><option>Golden hour</option><option>Night</option></select></label>
-    <label>Weather<select id="weather"><option>Sunny</option><option>Cloudy</option><option>Mixed</option><option>Low light</option></select></label>
-    <label>Filter<select id="filter"><option>No filter</option><option>Black Mist 1/8</option></select></label>
-    <label>Mood<select id="mood"><option>warm</option><option>natural</option><option>soft</option><option>vivid</option><option>muted</option><option>cinematic</option><option>cool</option></select></label>
+<section id="finder" class="view shell">
+  <div class="page-heading"><p class="eyebrow">Smart recipe finder</p><h1>Match the recipe to the scene.</h1><p>Use your conditions manually or pull them from the live weather card.</p></div>
+  <div class="panel finder-grid">
+    <label>Subject<select id="finderSubject"><option>travel</option><option>beach</option><option>street</option><option>nature</option><option>food</option><option>cars</option><option>portrait</option><option>architecture</option><option>pets</option><option>cinematic</option></select></label>
+    <label>Time<select id="finderTime"><option>Any</option><option>Morning</option><option>Afternoon</option><option>Golden hour</option><option>Blue hour</option><option>Night</option></select></label>
+    <label>Weather<select id="finderWeather"><option>Sunny</option><option>Cloudy</option><option>Mixed</option><option>Rain</option><option>Low light</option><option>Indoor</option></select></label>
+    <label>Mood<select id="finderMood"><option>natural</option><option>warm</option><option>soft</option><option>vivid</option><option>muted</option><option>deep</option><option>airy</option><option>editorial</option><option>cinematic</option><option>cool</option></select></label>
+    <label>Filter<select id="finderFilter"><option>No filter</option><option>Black Mist 1/8</option></select></label>
+    <label>Preferred focal length<select id="finderFocal"><option>Any</option><option>16–24mm</option><option>24–35mm</option><option>35–55mm</option><option>55–80mm</option></select></label>
   </div>
-  <button id="findBtn" class="primary">Find matches</button>
+  <div class="button-row">
+    <button id="runFinder" class="primary">Rank matches</button>
+    <button id="useWeatherFinder" class="secondary">Use current weather</button>
+  </div>
+  <div id="finderSummary" class="callout hidden"></div>
   <div id="finderResults" class="recipe-grid"></div>
 </section>
 
-<section id="library" class="page-section">
-  <div class="section-heading"><p class="eyebrow">Recipe library</p><h2>Browse and save your favorites</h2></div>
-  <div class="panel filters">
-    <input id="search" placeholder="Search beach, warm, Classic Chrome…">
-    <select id="collection"><option value="">All collections</option></select>
-    <select id="filterSelect"><option value="">All filter types</option><option>No filter needed</option><option>Works either way</option><option>Best with Black Mist 1/8</option></select>
-    <select id="viewSelect"><option value="all">All recipes</option><option value="fav">Favorites</option></select>
+<section id="library" class="view shell">
+  <div class="page-heading"><p class="eyebrow">Recipe library</p><h1>Every recipe has a graded preview.</h1><p>The same source scene is reused within a collection so differences in color, contrast, grain, and softness are easier to compare.</p></div>
+  <div class="panel filter-bar">
+    <input id="recipeSearch" placeholder="Search warm, beach, Classic Chrome, night…">
+    <select id="collectionFilter"><option value="">All collections</option></select>
+    <select id="mistFilter"><option value="">All filter types</option><option>No filter needed</option><option>Works either way</option><option>Best with Black Mist 1/8</option></select>
+    <select id="libraryView"><option value="all">All recipes</option><option value="favorites">Favorites</option><option value="custom">My custom recipes</option></select>
+    <select id="sortRecipes"><option value="featured">Featured</option><option value="name">Name A–Z</option><option value="rating">Rating</option><option value="collection">Collection</option></select>
   </div>
+  <div id="activeCollectionBanner" class="collection-banner hidden"></div>
   <div id="recipeGrid" class="recipe-grid"></div>
-  <button id="moreBtn" class="secondary centered">Show more</button>
+  <button id="showMoreRecipes" class="secondary centered">Show more</button>
 </section>
 
-<section id="slots" class="page-section">
-  <div class="section-heading"><p class="eyebrow">Recommended setup</p><h2>Your permanent C1–C7 layout</h2></div>
-  <div class="slot-grid">
-    <article><b>C1</b><h3>Everyday Natural</h3><p>Leave-on-camera default.</p></article>
-    <article><b>C2</b><h3>Golden Hour Editorial</h3><p>Warm sunsets and travel.</p></article>
-    <article><b>C3</b><h3>Documentary Muted</h3><p>Street, rain, architecture.</p></article>
-    <article><b>C4</b><h3>Beach Vivid</h3><p>Water, sky, nature.</p></article>
-    <article><b>C5</b><h3>Monochrome Deep</h3><p>Drama, texture, contrast.</p></article>
-    <article><b>C6</b><h3>Trip / Event</h3><p>Rotate based on plans.</p></article>
-    <article><b>C7</b><h3>Experiment</h3><p>Seasonal or Black Mist.</p></article>
+<section id="slots" class="view shell">
+  <div class="page-heading"><p class="eyebrow">Custom banks</p><h1>Plan C1–C7 before touching the camera.</h1><p>Your default set keeps five dependable recipes and leaves two rotating slots. Change any assignment and it saves on this device.</p></div>
+  <div id="slotGrid" class="slot-grid"></div>
+  <div class="two-grid section-gap">
+    <article class="panel">
+      <h3>Enter a recipe in camera order</h3>
+      <ol class="camera-order">
+        <li>IMAGE QUALITY SETTING → SELECT CUSTOM SETTING</li>
+        <li>EDIT/SAVE CUSTOM SETTING → choose C1–C7</li>
+        <li>Set Film Simulation and Dynamic Range</li>
+        <li>Set White Balance and WB Shift</li>
+        <li>Set Highlight, Shadow, Color, Sharpness, High ISO NR</li>
+        <li>Set Grain, Color Chrome FX, Color Chrome FX Blue, Clarity</li>
+        <li>Name the custom bank and save</li>
+      </ol>
+    </article>
+    <article class="panel">
+      <h3>XApp profile strategy</h3>
+      <p>Build themed seven-bank groups such as Daily, Travel, Night, and Black Mist. Back up the entire camera configuration in XApp, then restore the profile that fits the shoot.</p>
+      <div class="callout"><b>Important:</b> restoring a profile changes the saved camera settings as a group; it is not a one-recipe “send to C6” button.</div>
+      <button id="exportSlots" class="secondary">Export slot plan</button>
+    </article>
   </div>
-  <div class="callout"><b>XApp workflow:</b> keep multiple full camera-profile backups on your phone. Each backup can contain a different seven-bank set. Restoring a backup replaces the current camera configuration.</div>
 </section>
 
-<section id="learn" class="page-section">
-  <div class="section-heading"><p class="eyebrow">Learning center</p><h2>Understand every choice</h2></div>
-  <div class="tabs">
-    <button class="tab active" data-tab="recipes">Recipes</button>
-    <button class="tab" data-tab="exposure">Exposure</button>
-    <button class="tab" data-tab="focus">Autofocus</button>
-    <button class="tab" data-tab="wb">White balance</button>
-    <button class="tab" data-tab="mist">Black Mist</button>
-    <button class="tab" data-tab="raw">RAW vs JPEG</button>
+<section id="builder" class="view shell">
+  <div class="page-heading"><p class="eyebrow">Recipe builder</p><h1>Design your own look.</h1><p>Move the creative controls, watch the preview change, and save the resulting X‑T5 settings to your private library.</p></div>
+  <div class="builder-layout">
+    <div class="panel builder-controls">
+      <label>Name<input id="builderName" value="My Florida Evening"></label>
+      <label>Base simulation<select id="builderSimulation"><option>REALA ACE</option><option>PROVIA/STANDARD</option><option>Velvia/VIVID</option><option>ASTIA/SOFT</option><option>Classic Chrome</option><option>Classic Neg.</option><option>NOSTALGIC Neg.</option><option>ETERNA/CINEMA</option><option>ETERNA Bleach Bypass</option><option>ACROS+R</option></select></label>
+      <label>Preview scene<select id="builderScene"></select></label>
+      <label>Warmth <output id="warmthOut">2</output><input id="builderWarmth" type="range" min="-5" max="5" value="2"></label>
+      <label>Contrast <output id="contrastOut">0</output><input id="builderContrast" type="range" min="-4" max="4" value="0"></label>
+      <label>Color <output id="colorOut">1</output><input id="builderColor" type="range" min="-4" max="4" value="1"></label>
+      <label>Softness <output id="softnessOut">1</output><input id="builderSoftness" type="range" min="0" max="5" value="1"></label>
+      <label>Grain <output id="grainOut">1</output><input id="builderGrain" type="range" min="0" max="3" value="1"></label>
+      <label><span>Simulate Black Mist 1/8</span><input id="builderMist" type="checkbox"></label>
+      <div class="button-row"><button id="saveCustomRecipe" class="primary">Save custom recipe</button><button id="resetBuilder" class="secondary">Reset</button></div>
+    </div>
+    <div class="panel builder-preview-panel">
+      <div class="builder-preview"><img id="builderPreview" src="assets/sources/golden.jpg" alt="Custom recipe preview"><div id="builderGrainLayer"></div></div>
+      <div id="builderSettings" class="settings-grid"></div>
+    </div>
   </div>
-  <div id="learnPanel" class="panel"></div>
 </section>
 
-<section id="tools" class="page-section">
-  <div class="section-heading"><p class="eyebrow">Field tools</p><h2>Plan, pack, and practice</h2></div>
+<section id="guide" class="view shell">
+  <div class="page-heading"><p class="eyebrow">Interactive X‑T5 guide</p><h1>Learn what each control actually does.</h1><p>Tap a camera control or search the menu explorer. Explanations focus on real shooting decisions, not manual jargon.</p></div>
+  <div class="guide-layout">
+    <div class="panel camera-diagram">
+      <div class="camera-shell" aria-label="Stylized Fujifilm X-T5 control diagram">
+        <button class="hotspot iso" data-control="iso">ISO</button>
+        <button class="hotspot shutter" data-control="shutter">SS</button>
+        <button class="hotspot exposure" data-control="exposure">±</button>
+        <button class="hotspot viewfinder" data-control="viewfinder">EVF</button>
+        <button class="hotspot q" data-control="q">Q</button>
+        <button class="hotspot joystick" data-control="joystick">●</button>
+        <button class="hotspot drive" data-control="drive">DRIVE</button>
+        <div class="camera-screen">X‑T5</div>
+        <div class="camera-lens"></div>
+      </div>
+      <div id="controlExplanation" class="control-explanation"></div>
+    </div>
+    <div class="panel">
+      <div class="inline-form"><input id="menuSearch" placeholder="Search autofocus, dynamic range, clarity…"></div>
+      <div id="menuExplorer" class="menu-explorer"></div>
+    </div>
+  </div>
+  <div class="section-heading section-gap"><div><p class="eyebrow">Learning center</p><h2>Build skill one topic at a time</h2></div></div>
+  <div class="learning-layout">
+    <aside id="lessonList" class="lesson-list"></aside>
+    <article id="lessonContent" class="panel lesson-content"></article>
+  </div>
+</section>
+
+<section id="planner" class="view shell">
+  <div class="page-heading"><p class="eyebrow">Shoot planner</p><h1>Plan light, weather, gear, and shots.</h1><p>Weather data comes from Open‑Meteo when online; your lists and reminders stay on this device.</p></div>
+  <div class="planner-grid">
+    <article class="panel wide">
+      <h3>Live forecast and light windows</h3>
+      <div class="inline-form"><input id="plannerLocationInput" placeholder="City or ZIP code"><button id="plannerSearch" class="primary">Search</button><button id="plannerUseCurrent" class="secondary">Use my location</button></div>
+      <div id="plannerChoices" class="choice-list"></div>
+      <div id="plannerForecast" class="forecast-grid empty-state">Choose a location.</div>
+    </article>
+    <article class="panel"><h3>Shot list</h3><form id="shotForm" class="inline-form"><input id="shotInput" placeholder="Example: 16mm establishing shot"><button class="primary">Add</button></form><div id="shotList" class="check-list"></div></article>
+    <article class="panel"><h3>Packing list</h3><select id="packingTemplate"><option value="day">Day walk</option><option value="travel">Travel</option><option value="night">Night / Black Mist</option><option value="rain">Rain</option></select><button id="loadPacking" class="secondary">Load template</button><div id="packingList" class="check-list"></div></article>
+    <article class="panel"><h3>Gear inventory</h3><form id="gearForm" class="inline-form"><input id="gearInput" placeholder="Add gear"><button class="primary">Add</button></form><div id="gearList" class="check-list"></div></article>
+    <article class="panel"><h3>Maintenance reminders</h3><div id="maintenanceList" class="maintenance-list"></div></article>
+    <article class="panel"><h3>Photography challenge</h3><p id="challengeText" class="challenge-text"></p><button id="newChallenge" class="secondary">New challenge</button></article>
+  </div>
+</section>
+
+<section id="journal" class="view shell">
+  <div class="page-heading"><p class="eyebrow">Private shooting journal</p><h1>Record what worked.</h1><p>Entries, notes, and optional small thumbnails are stored locally in this browser unless you export a backup.</p></div>
+  <div class="journal-layout">
+    <form id="journalForm" class="panel journal-form">
+      <h3>New entry</h3>
+      <label>Title<input id="journalTitle" required placeholder="Sunset walk at the beach"></label>
+      <div class="two-fields"><label>Date<input id="journalDate" type="date" required></label><label>Rating<select id="journalRating"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label></div>
+      <label>Location<input id="journalLocation" placeholder="Clearwater Beach"></label>
+      <label>Recipe<select id="journalRecipe"></select></label>
+      <label>Lens / focal length<input id="journalLens" value="XF 16–80mm"></label>
+      <label>What worked / what to change<textarea id="journalNotes" rows="5"></textarea></label>
+      <label>Optional photo thumbnail<input id="journalPhoto" type="file" accept="image/*"></label>
+      <button class="primary">Save entry</button>
+    </form>
+    <div>
+      <div id="journalStats" class="stat-grid compact"></div>
+      <div id="journalEntries" class="journal-list"></div>
+    </div>
+  </div>
+</section>
+
+<section id="tools" class="view shell">
+  <div class="page-heading"><p class="eyebrow">Field tools</p><h1>Exposure, EXIF, locations, and backups.</h1></div>
   <div class="tool-grid">
-    <article class="panel"><h3>Exposure assistant</h3><label>Subject motion<select id="motion"><option value="still">Still scene</option><option value="people">People / pets</option><option value="action">Action</option></select></label><label>Light<select id="light"><option value="sun">Bright daylight</option><option value="cloud">Cloudy / shade</option><option value="indoor">Indoor</option><option value="night">Night</option></select></label><button id="exposureBtn" class="primary">Suggest settings</button><div id="exposureOut" class="callout"></div></article>
-    <article class="panel"><h3>Golden-hour planner</h3><p>Enter the local sunset time from your weather app.</p><label>Sunset<input id="sunset" type="time"></label><button id="goldBtn" class="primary">Make schedule</button><div id="goldOut"></div></article>
-    <article class="panel"><h3>Gear checklist</h3><div id="gearList" class="checklist"></div></article>
-    <article class="panel"><h3>Challenge</h3><p id="challenge" class="challenge"></p><button id="challengeBtn" class="secondary">Another challenge</button></article>
+    <article class="panel"><h3>Exposure starting point</h3>
+      <label>Subject<select id="exposureSubject"><option value="still">Still scene</option><option value="people">People / pets</option><option value="action">Action</option><option value="water">Flowing water</option><option value="night">Night handheld</option></select></label>
+      <label>Light<select id="exposureLight"><option value="sun">Bright daylight</option><option value="cloud">Cloudy / shade</option><option value="indoor">Indoor</option><option value="night">Night</option></select></label>
+      <button id="exposureSuggest" class="primary">Suggest settings</button><div id="exposureResult" class="callout"></div>
+    </article>
+    <article class="panel"><h3>EXIF viewer</h3><p>Choose a JPEG. The file stays in your browser.</p><input id="exifFile" type="file" accept="image/jpeg"><div id="exifResult" class="exif-result"></div></article>
+    <article class="panel wide"><h3>Saved photo locations</h3>
+      <div class="inline-form"><input id="mapName" placeholder="Location name"><input id="mapLat" type="number" step="any" placeholder="Latitude"><input id="mapLon" type="number" step="any" placeholder="Longitude"><button id="addMapPin" class="primary">Save pin</button></div>
+      <div id="photoMap"></div><div id="mapFallback" class="location-list"></div>
+    </article>
+    <article class="panel"><h3>Backup center</h3><p>Export favorites, notes, C-slots, custom recipes, journal entries, gear, lists, and locations.</p><div class="button-stack"><button id="exportBackup" class="primary">Export all data</button><label class="file-button">Import backup<input id="importBackup" type="file" accept="application/json"></label><button id="clearLocalData" class="danger">Clear local data</button></div></article>
+    <article class="panel"><h3>App status</h3><div id="appStatus"></div><button id="refreshApp" class="secondary">Refresh cached app</button></article>
   </div>
+  <details class="panel credits"><summary>Image and data credits</summary><p>Recipe previews are processed approximations created from reusable sample photographs distributed with open-source packages. See <code>CREDITS.md</code> in the project files. Weather and sunrise/sunset data are requested from Open‑Meteo. Map tiles are provided by OpenStreetMap contributors when the map is online.</p></details>
 </section>
 </main>
 
-<div id="compareTray" class="compare-tray"><span id="compareNames"></span><button id="openCompare" class="primary">Compare</button><button id="clearCompare">Clear</button></div>
-<div id="modal" class="modal"><div class="modal-card"><button id="closeModal" class="close">×</button><div id="modalContent"></div></div></div>
+<div id="compareTray" class="compare-tray" aria-live="polite">
+  <span id="compareNames"></span><button id="openCompare" class="primary">Compare</button><button id="clearCompare" class="quiet">Clear</button>
+</div>
 
-<footer><p>Original recipe starting points for the Fujifilm X‑T5. Example visual styling is illustrative, not a calibrated preview of each exact recipe.</p></footer>
-<script src="app.js"></script>
+<div id="recipeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <button id="closeModal" class="modal-close" aria-label="Close">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
+<script src="js/app.js" defer></script>
 </body>
 </html>
